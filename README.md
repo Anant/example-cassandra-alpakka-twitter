@@ -18,7 +18,7 @@ Docker (and required RAM for running a Cassandra container)
 
 ## Table of Contents
 1. [Setup and run local Cassandra using Docker](#Cassandra-Setup)
-2. [Configure Twitter API keys + hashtag to filter by](#Twitter-Setup)
+2. [Configure Twitter API keys](#Twitter-Setup)
 3. [Setup hashtags and run the project using SBT](#Running-The-Project)
 4. [Observe results in Cassandra using cqlsh](#Observe-Tables)
 
