@@ -1,0 +1,33 @@
+Blog post on learn.anant.us for now?
+Blog Post Guidelines: https://docs.google.com/document/d/14_hSnRnwQHZ4mZ4BXYPU1kUq2ngvr8E_NYuc4oQSFsM/edit#heading=h.5hbfcaugd4fx
+
+Main points to cover in blog: 
+-Alpakka Cassandra[https://doc.akka.io/docs/alpakka/current/cassandra.html]
+--Built on top of Akka Streams
+---Reactive Streams compliant implementation
+---https://www.reactive-streams.org/
+--Uses concepts of Source, Flow, and Sink from Akka Streams
+---No CassandraSink anymore (sink equivalent to having a flow which goes to Sink.empty)
+---.via(CassandraFlow...).to(Sink.ignore)
+--Main points: CassandraSource, CassandraFlow
+---CassandraSource: Obtain an Akka Streams Source from CQL queries and from com.datastax.oss.driver.api.core.cql.Statements.
+---CassandraFlow: Obtain Akka Stream Flows to run CQL statements that change data (update, or insert). Alpakka Cassandra makes prepared statements and binds incoming elements using input statement binder function to make BoundStatements. 
+--Uses Datastax java/scala cassandra driver
+---Scala code compiles into JVM code, same as Java. Can use both Java and Scala in same project/file if you want to. 
+-Twitter4S (Scala Twitter Client using Twitter API v1.1, implemented using Akka-Http)
+--Easy way to pull things from twitter without dealing with twitter api directly
+--Need twitter developer account + application, apply on their site: developer.twitter.com
+--Need JDK 8, not more recent versions
+--This project uses TwitterStreamingClient in this project, which is used to support stream connections offered by the Twitter Streaming API.
+--Uses method .filterStatuses, inputting field tracks to get tweets which have any of a given set of hashtags 
+---https://github.com/DanielaSfregola/twitter4s/blob/423a41e56053f35afe45418a6d98b8cfbd1d61e7/src/main/scala/com/danielasfregola/twitter4s/http/clients/streaming/statuses/TwitterStatusClient.scala
+-Built with SBT
+--Interactive Build Tool for Scala and Java projects
+--An overwhelmingly large portion of Scala projects are built with SBT
+-Repository/Readme for the Project: 
+--Titled Alpakka Cassandra + Twitter? [Alpakka Twitter]
+--Things to list here: 
+---Requirements
+---Twitter Dev Application
+---Running Cassandra Locally with Docker
+---[make sure to run cqlsh]
