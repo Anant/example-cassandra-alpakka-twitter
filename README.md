@@ -12,6 +12,7 @@ The project will only save tweets which are not a retweet of another tweet. Curr
 Scala 2.12+
 JDK 8
 sbt 1.3.1+ (project uses 1.4.8, unsure about this line)
+Docker (and required RAM for running a Cassandra container)
 ```
 - - -
 
@@ -49,7 +50,7 @@ exit
 ```
 
 ## Twitter Setup
-From the root folder of this repository, browse to the application.conf.example file found in /src/main/resources/application.conf.example. Copy this file into this same directory and rename it application.conf 
+From the root folder of this repository, browse to the application.conf.example file found in /src/main/resources/application.conf.example. Copy this file into this same directory and rename it application.conf  
 Go to the [twitter developer dashboard](https://developer.twitter.com/en/portal/dashboard) website, register an application and insert these four twitter api keys into this portion of application.conf: 
 ```
 twitter {
