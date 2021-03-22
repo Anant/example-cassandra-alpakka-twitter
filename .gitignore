@@ -11,3 +11,4 @@ target/
 .bloop
 
 src/main/resources/application.conf
+./blogTemplate.txt
