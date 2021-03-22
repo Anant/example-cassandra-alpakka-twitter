@@ -1,7 +1,7 @@
 package com.alptwitter
 
 import akka.actor.typed.ActorRef
-import akka.actor.ActorSystem //maybe should be .actor.typed.ActorSystem? unsure...
+import akka.actor.ActorSystem
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
 import akka.stream.scaladsl.{Sink, Source}
@@ -21,10 +21,7 @@ import scala.util.{Success, Failure, Random}
 import com.danielasfregola.twitter4s.TwitterStreamingClient
 import com.danielasfregola.twitter4s.entities.Tweet
 
-//To figure out session setting stuff, look at this?
-//https://doc.akka.io/docs/alpakka/current/cassandra.html#custom-session-creation
-//Maybe this is more useful: https://doc.akka.io/docs/akka/current/general/configuration.html
-//Additionally, errors about "Failed to connect with protocol DSE_V2 or DSE_V1" are not actually errors/warnings
+//Prints errors about "Failed to connect with protocol DSE_V2 or DSE_V1" are not actually errors/warnings
 //See https://community.datastax.com/questions/6847/spring-data-cassandra-connectivity-issue.html
 //Datastax java driver is now unified for both OSS and DSE Cassandra, and DSE_V2 and DSE_V1 are for Cassandra.
 
@@ -70,7 +67,7 @@ object AlpakkaTwitter extends App {
 
           written.onComplete({
             case Success(value) => {
-              //println(value{0}.id)
+              //Successfully wrote tweet to Cassandra
             }
             case Failure(exception) => {
               exception.printStackTrace
@@ -90,14 +87,6 @@ object AlpakkaTwitter extends App {
       .map(_.getString("release_version"))
       .runWith(Sink.head)
 
-  //Example of how to pull from Cassandra, pull from custom table
-  /*
-  val tableV: Future[String] =
-  CassandraSource(s"SELECT * FROM $keyspace.$table where id=37")
-    .map(_.getString("excerpt"))
-    .runWith(Sink.head)
-   */
-
   //Prints version number of Cassandra being used
   version.onComplete({
     case Success(value) => {
@@ -108,5 +97,13 @@ object AlpakkaTwitter extends App {
       exception.printStackTrace
     }
   })
+
+  //Example of how to pull from Cassandra, pull from custom table
+  /*
+  val tableV: Future[String] =
+  CassandraSource(s"SELECT * FROM $keyspace.$table where id=37")
+    .map(_.getString("excerpt"))
+    .runWith(Sink.head)
+   */
 
 }
