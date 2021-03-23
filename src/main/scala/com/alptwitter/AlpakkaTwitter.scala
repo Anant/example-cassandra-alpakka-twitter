@@ -6,6 +6,7 @@ import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
 import akka.stream.scaladsl.{Sink, Source}
 import akka.stream.ActorMaterializer
+import akka.stream.OverflowStrategy
 import akka.stream.alpakka.cassandra.CassandraSessionSettings
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSession
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSessionRegistry
@@ -48,31 +49,26 @@ object AlpakkaTwitter extends App {
     (insert, preparedStatement) =>
       preparedStatement.bind(insert.id, insert.text)
 
+  val queue = Source
+    .queue[CutTweet](10, OverflowStrategy.backpressure)
+    .via(
+      CassandraFlow.create(
+        CassandraWriteSettings.defaults,
+        s"INSERT INTO $keyspace.$table(id, excerpt) VALUES (?, ?)",
+        statementBinder
+      )
+    )
+    .to(Sink.ignore)
+    .run()
+
   streamingClient.filterStatuses(tracks = trackedWords) {
     case tweet: Tweet => {
       tweet.retweeted_status match {
         case None => {
           println("Found a non-retweeted tweet!")
           //Now we want to save the Tweet using Alpakka Cassandra
-          val testInsert = Seq(CutTweet(tweet.id, tweet.text))
-          val written: Future[Seq[CutTweet]] = Source(testInsert)
-            .via(
-              CassandraFlow.create(
-                CassandraWriteSettings.defaults,
-                s"INSERT INTO $keyspace.$table(id, excerpt) VALUES (?, ?)",
-                statementBinder
-              )
-            )
-            .runWith(Sink.seq)
-
-          written.onComplete({
-            case Success(value) => {
-              //Successfully wrote tweet to Cassandra
-            }
-            case Failure(exception) => {
-              exception.printStackTrace
-            }
-          })
+          val testInsert = CutTweet(tweet.id, tweet.text);
+          queue.offer(testInsert)
         }
         case Some(tweet2) => {
           println("This is a retweet of a previous tweet, will not save")
