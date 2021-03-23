@@ -1,7 +1,7 @@
 # Alpakka Cassandra + Twitter4Scala
 
 ## About this Project
-This project uses Alpakka Cassandra 2.0 and Scala to pull new Tweets from Twitter for a given hashtag (or set of hashtags) using Twitter API v1.1 (through twitter4s scala twitter client) and write them into a local Cassandra database. 
+This project uses Alpakka Cassandra 2.0, Akka Streams and Scala to pull new Tweets from Twitter for a given hashtag (or set of hashtags) using Twitter API v1.1 (through twitter4s scala twitter client) and write them into a local Cassandra database. 
 
 The project will only save tweets which are not a retweet of another tweet. Currently only saves the truncated version (<=140 chars) of tweets. 
 
@@ -11,7 +11,7 @@ The project will only save tweets which are not a retweet of another tweet. Curr
 ```
 Scala 2.12+
 JDK 8
-sbt 1.3.1+ (project uses 1.4.8, unsure about this line)
+sbt 1.3.1+ (project uses 1.4.8)
 Docker (and required RAM for running a Cassandra container)
 ```
 - - -
@@ -33,7 +33,7 @@ Make sure your container is running (may need to give the container a few minute
 ```
 docker ps -a
 ```
-[Screenshot goes here?]  
+[Screenshot]  
 Afterwards, run CQLSH on the container in interactive terminal mode to setup keyspace and tables: 
 ```
 docker exec -it my-cassandra cqlsh
