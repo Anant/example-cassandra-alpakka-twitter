@@ -1,4 +1,4 @@
-# Alpakka Cassandra + Twitter4Scala
+# Alpakka Cassandra + Twitter4S
 
 ## About this Project
 
