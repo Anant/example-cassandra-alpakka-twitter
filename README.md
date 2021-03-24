@@ -35,7 +35,7 @@ Make sure your container is running (may need to give the container a few minute
 ```
 docker ps -a
 ```
-![Screenshot](/Assets/DockerPsA.png) 
+![Screenshot](/Assets/DockerPsA.png)  
 The above output shows that the container has been running for 3 minutes, and also shows that port 9042 locally is bound to port 9042 in the container. (default port for Cassandra)  
 Afterwards, run CQLSH on the container in interactive terminal mode to setup keyspace and tables: 
 ```
