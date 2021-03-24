@@ -1,4 +1,4 @@
-# Alpakka Cassandra + Twitter4S
+# Alpakka Cassandra and Twitter
 
 ## About this Project
 
