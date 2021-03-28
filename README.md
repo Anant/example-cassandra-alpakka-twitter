@@ -1,11 +1,10 @@
 # Alpakka Cassandra and Twitter
 
-## About this Project
-
 This project is a Scala application which uses [Alpakka Cassandra 2.0](https://doc.akka.io/docs/alpakka/current/cassandra.html), [Akka Streams](https://doc.akka.io/docs/akka/current/stream/index.html) and [Twitter4S](https://github.com/DanielaSfregola/twitter4s) (Scala Twitter Client) to pull new Tweets from Twitter for a given hashtag (or set of hashtags) using Twitter API v1.1 and write them into a local Cassandra database. 
 
 **NOTE:** The project will only save tweets which are not a retweet of another tweet and currently only saves the truncated version of tweets (<=140 chars). 
-
+<br />
+<br />
 ![Img](Assets/Cassandra-Alpakka-Twitter.png)  
 
 - - - 
