@@ -69,6 +69,8 @@ object AlpakkaTwitter extends App {
           //Now we want to save the Tweet using Alpakka Cassandra
           val testInsert = CutTweet(tweet.id, tweet.text);
           queue.offer(testInsert)
+
+          //Add segment here to talk to cassandra.api
         }
         case Some(tweet2) => {
           println("This is a retweet of a previous tweet, will not save")
