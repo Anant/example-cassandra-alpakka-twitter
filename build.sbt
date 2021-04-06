@@ -3,6 +3,7 @@ version := "0.1"
 scalaVersion := "2.13.1"
 val AkkaVersion = "2.6.13"
 val AlpakkaVersion = "2.0.2"
+val AkkaHttpVersion = "10.2.4"
 
 resolvers += Resolver.sonatypeRepo("releases")
 
@@ -17,7 +18,9 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % AkkaVersion,
   "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test,
   "org.scalatest" %% "scalatest" % "3.1.0" % Test, 
-  "ch.qos.logback" % "logback-classic" % "1.2.3"
+  "ch.qos.logback" % "logback-classic" % "1.2.3", 
+  "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion, 
+  "com.typesafe.akka" %% "akka-http-spray-json" % "10.2.4"
 )
 
 //Dependencies for Alpakka Cassandra

@@ -15,6 +15,9 @@ import akka.stream.alpakka.cassandra.scaladsl.CassandraFlow
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSource
 import com.datastax.oss.driver.api.core.cql.{BoundStatement, PreparedStatement}
 
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Success, Failure, Random}
@@ -61,16 +64,37 @@ object AlpakkaTwitter extends App {
     .to(Sink.ignore)
     .run()
 
+  println(queue.getClass)
+
+  //Sample request... 
+  val responseFuture: Future[HttpResponse] = Http().singleRequest(
+    HttpRequest(uri = "http://localhost:8000/api/leaves/14012")
+  )
+
+  responseFuture
+    .onComplete {
+      case Success(res) => {
+        //Need to run this resulting dataBytes Akka Streams Source to not get warning after 1 second.
+        println(res) 
+        println(res.entity)
+        res.entity.dataBytes.to(Sink.foreach(println(_))).run()
+        //res.discardEntityBytes() //discards straight from HttpResponse object
+      }
+      case Failure(_) => sys.error("something wrong")
+    }
+
   streamingClient.filterStatuses(tracks = trackedWords) {
     case tweet: Tweet => {
       tweet.retweeted_status match {
         case None => {
           println("Found a non-retweeted tweet!")
+          println(tweet.entities)
           //Now we want to save the Tweet using Alpakka Cassandra
           val testInsert = CutTweet(tweet.id, tweet.text);
           queue.offer(testInsert)
 
           //Add segment here to talk to cassandra.api
+
         }
         case Some(tweet2) => {
           println("This is a retweet of a previous tweet, will not save")
