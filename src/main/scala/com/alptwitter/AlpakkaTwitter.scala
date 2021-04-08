@@ -1,5 +1,6 @@
 package com.alptwitter
 
+import com.alptwitter.model._
 import akka.actor.typed.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.typed.Behavior
@@ -15,6 +16,9 @@ import akka.stream.alpakka.cassandra.scaladsl.CassandraFlow
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSource
 import com.datastax.oss.driver.api.core.cql.{BoundStatement, PreparedStatement}
 
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+import spray.json._
+
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 
@@ -29,10 +33,7 @@ import com.danielasfregola.twitter4s.entities.Tweet
 //See https://community.datastax.com/questions/6847/spring-data-cassandra-connectivity-issue.html
 //Datastax java driver is now unified for both OSS and DSE Cassandra, and DSE_V2 and DSE_V1 are for Cassandra.
 
-//Case class used to model a row of the Cassandra Table (only id + text of a Tweet)
-case class CutTweet(id: Long, text: String)
-
-object AlpakkaTwitter extends App {
+object AlpakkaTwitter extends App with LeavesJsonProtocol{
 
   val keyspace = "testkeyspace"
   val table = "testtable"
@@ -44,6 +45,10 @@ object AlpakkaTwitter extends App {
   val sessionSettings = CassandraSessionSettings()
   implicit val cassandraSession: CassandraSession =
     CassandraSessionRegistry.get(system).sessionFor(sessionSettings)
+
+  //This is for JsonEntityStreaming
+  //implicit val jsonStreamingSupport: JsonEntityStreamingSupport =
+  //  EntityStreamingSupport.json()
 
   //This is for pulling Tweets from Twitter
   val streamingClient = TwitterStreamingClient()
@@ -66,22 +71,41 @@ object AlpakkaTwitter extends App {
 
   println(queue.getClass)
 
-  //Sample request... 
+  //Sample request, reading item with id 14012 from locally running cassandra.api
   val responseFuture: Future[HttpResponse] = Http().singleRequest(
     HttpRequest(uri = "http://localhost:8000/api/leaves/14012")
+  )
+
+  //Test-URL to insert: https://github.com/Anant/cassandra.api
+  val inputUrl = MyUrl("https://github.com/Anant/cassandra.api")
+  val responseFuture2: Future[HttpResponse] = Http().singleRequest(
+    HttpRequest(
+      method = HttpMethods.POST,
+      uri = "http://localhost:8000/api/leaves",
+      entity = HttpEntity(ContentTypes.`application/json`, inputUrl.toJson.toString)
+    )
   )
 
   responseFuture
     .onComplete {
       case Success(res) => {
         //Need to run this resulting dataBytes Akka Streams Source to not get warning after 1 second.
-        println(res) 
+        println(res)
         println(res.entity)
-        res.entity.dataBytes.to(Sink.foreach(println(_))).run()
+        res.entity.dataBytes.to(Sink.ignore).run()
         //res.discardEntityBytes() //discards straight from HttpResponse object
       }
-      case Failure(_) => sys.error("something wrong")
+      case Failure(_) => sys.error("Something went seriously wrong")
     }
+
+  responseFuture2.onComplete {
+    case Success(res) => {
+      println(res)
+      println(res.entity)
+      res.entity.dataBytes.to(Sink.ignore).run()
+    }
+    case Failure(_) => sys.error("Something wrong with POST response")
+  }
 
   streamingClient.filterStatuses(tracks = trackedWords) {
     case tweet: Tweet => {
