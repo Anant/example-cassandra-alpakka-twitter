@@ -1,12 +1,12 @@
 package com.alptwitter.model
 
 case class Leaves(
-    is_archived: Int,
+    is_archived: BigDecimal,
     all: List[String],
-    is_starred: Int,
+    is_starred: BigDecimal,
     user_name: String,
     user_email: String,
-    user_id: Int,
+    user_id: BigDecimal,
     tags: List[String],
     slugs: List[String],
     is_public: Boolean,
@@ -18,11 +18,15 @@ case class Leaves(
     updated_at: String,
     mimetype: String,
     language: String,
-    reading_time: Int,
+    reading_time: BigDecimal,
     domain_name: String,
     preview_picture: String,
-    http_status: String,
-    links: List[String],
+    contact: Leaves2
+)
+
+case class Leaves2(
+    http_status: String, 
+    links: List[String], 
     content: String
 )
 
