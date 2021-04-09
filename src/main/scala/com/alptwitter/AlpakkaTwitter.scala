@@ -33,7 +33,7 @@ import com.danielasfregola.twitter4s.entities.Tweet
 //See https://community.datastax.com/questions/6847/spring-data-cassandra-connectivity-issue.html
 //Datastax java driver is now unified for both OSS and DSE Cassandra, and DSE_V2 and DSE_V1 are for Cassandra.
 
-object AlpakkaTwitter extends App with LeavesJsonProtocol{
+object AlpakkaTwitter extends App with LeavesJsonProtocol {
 
   val keyspace = "testkeyspace"
   val table = "testtable"
@@ -82,7 +82,8 @@ object AlpakkaTwitter extends App with LeavesJsonProtocol{
     HttpRequest(
       method = HttpMethods.POST,
       uri = "http://localhost:8000/api/leaves",
-      entity = HttpEntity(ContentTypes.`application/json`, inputUrl.toJson.toString)
+      entity =
+        HttpEntity(ContentTypes.`application/json`, inputUrl.toJson.toString)
     )
   )
 
@@ -92,12 +93,19 @@ object AlpakkaTwitter extends App with LeavesJsonProtocol{
         //Need to run this resulting dataBytes Akka Streams Source to not get warning after 1 second.
         println(res)
         println(res.entity)
-        res.entity.dataBytes.to(Sink.ignore).run()
+        val myAnswer = res.entity.dataBytes.runReduce(_ ++ _);
         //res.discardEntityBytes() //discards straight from HttpResponse object
+        myAnswer.onComplete {
+          case Success(stuff) => {
+            println(stuff)
+          }
+          case Failure(_) => {
+            sys.error("Failure gathering data-bytes into one thing")
+          }
+        }
       }
       case Failure(_) => sys.error("Something went seriously wrong")
     }
-
   responseFuture2.onComplete {
     case Success(res) => {
       println(res)
