@@ -3,12 +3,16 @@ package com.alptwitter.model
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import spray.json._
 
+//Some notes on this protocol: 
+//Leaves has 23 fields, but this only imports 22 of the fields. 
+//Missing the last field
+
 trait LeavesJsonProtocol extends SprayJsonSupport with DefaultJsonProtocol {
   //Below commented line does not work because max jsonFormatX is 22 (need 23...)
   //implicit val leavesFormat = jsonFormat23(Leaves)
   implicit val myUrlFormat = jsonFormat1(MyUrl)
-  implicit val leaves2Format = jsonFormat3(Leaves2)
-  implicit val leavesFormat = jsonFormat21(Leaves)
+  //implicit val leaves2Format = jsonFormat3(Leaves2)
+  implicit val leavesFormat = jsonFormat22(Leaves)
 
 
 

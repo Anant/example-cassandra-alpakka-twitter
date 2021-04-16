@@ -37,7 +37,6 @@ object AlpakkaTwitter extends App with LeavesJsonProtocol {
 
   val keyspace = "testkeyspace"
   val table = "testtable"
-  val randomizer = new Random()
 
   //Akka ActorSystem and ActorMaterializer,  implicitly used by other things
   implicit val system: ActorSystem = ActorSystem()
@@ -45,10 +44,6 @@ object AlpakkaTwitter extends App with LeavesJsonProtocol {
   val sessionSettings = CassandraSessionSettings()
   implicit val cassandraSession: CassandraSession =
     CassandraSessionRegistry.get(system).sessionFor(sessionSettings)
-
-  //This is for JsonEntityStreaming
-  //implicit val jsonStreamingSupport: JsonEntityStreamingSupport =
-  //  EntityStreamingSupport.json()
 
   //This is for pulling Tweets from Twitter
   val streamingClient = TwitterStreamingClient()
@@ -69,15 +64,13 @@ object AlpakkaTwitter extends App with LeavesJsonProtocol {
     .to(Sink.ignore)
     .run()
 
-  println(queue.getClass)
-
   //Sample request, reading item with id 14012 from locally running cassandra.api
   val responseFuture: Future[HttpResponse] = Http().singleRequest(
     HttpRequest(uri = "http://localhost:8000/api/leaves/14012")
   )
 
   //Test-URL to insert: https://github.com/Anant/cassandra.api
-  val inputUrl = MyUrl("https://github.com/Anant/cassandra.api")
+  val inputUrl = MyUrl("https://github.com/StefanVinica/jamstack.org")
   val responseFuture2: Future[HttpResponse] = Http().singleRequest(
     HttpRequest(
       method = HttpMethods.POST,
@@ -91,13 +84,15 @@ object AlpakkaTwitter extends App with LeavesJsonProtocol {
     .onComplete {
       case Success(res) => {
         //Need to run this resulting dataBytes Akka Streams Source to not get warning after 1 second.
-        println(res)
-        println(res.entity)
+        //println(res)
         val myAnswer = res.entity.dataBytes.runReduce(_ ++ _);
         //res.discardEntityBytes() //discards straight from HttpResponse object
         myAnswer.onComplete {
           case Success(stuff) => {
-            println(stuff)
+            val leavesJsonAst = stuff.utf8String.parseJson;
+            println("Attempting to transform into a Leaves object")
+            val leavesObject = leavesJsonAst.convertTo[Leaves];
+            println(leavesObject.title)
           }
           case Failure(_) => {
             sys.error("Failure gathering data-bytes into one thing")
@@ -108,8 +103,7 @@ object AlpakkaTwitter extends App with LeavesJsonProtocol {
     }
   responseFuture2.onComplete {
     case Success(res) => {
-      println(res)
-      println(res.entity)
+      //println(res.entity)
       res.entity.dataBytes.to(Sink.ignore).run()
     }
     case Failure(_) => sys.error("Something wrong with POST response")
@@ -124,9 +118,8 @@ object AlpakkaTwitter extends App with LeavesJsonProtocol {
           //Now we want to save the Tweet using Alpakka Cassandra
           val testInsert = CutTweet(tweet.id, tweet.text);
           queue.offer(testInsert)
-
-          //Add segment here to talk to cassandra.api
-
+          //TODO: Send message(s) to actor which deals with sending messages to Cassandra.API
+          //Message should contain a string of the url (multiple messages if multiple links)
         }
         case Some(tweet2) => {
           println("This is a retweet of a previous tweet, will not save")
@@ -135,13 +128,13 @@ object AlpakkaTwitter extends App with LeavesJsonProtocol {
     }
   }
 
+  //Prints version number of Cassandra being used
   val version: Future[String] =
     cassandraSession
       .select("SELECT release_version FROM system.local;")
       .map(_.getString("release_version"))
       .runWith(Sink.head)
 
-  //Prints version number of Cassandra being used
   version.onComplete({
     case Success(value) => {
       println()
@@ -151,6 +144,7 @@ object AlpakkaTwitter extends App with LeavesJsonProtocol {
       exception.printStackTrace
     }
   })
+
 
   //Example of how to pull from Cassandra, pull from custom table
   /*

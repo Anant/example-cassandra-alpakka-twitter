@@ -21,14 +21,18 @@ case class Leaves(
     reading_time: BigDecimal,
     domain_name: String,
     preview_picture: String,
-    contact: Leaves2
+    //contact: Leaves2
+    http_status: String, 
+    links: List[String]
 )
 
+/*
 case class Leaves2(
     http_status: String, 
     links: List[String], 
     content: String
 )
+*/
 
 case class MyUrl(
     url: String
